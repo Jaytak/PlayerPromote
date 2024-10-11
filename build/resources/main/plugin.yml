@@ -1,5 +1,5 @@
 name: PlayerPromote
-version: '0.1.4'
+version: '0.1.19'
 main: com.jaytak.playerPromote.PlayerPromote
 api-version: '1.21'
 commands:
@@ -7,3 +7,7 @@ commands:
     description: Promotes the player to the "player" group.
     usage: /agree
     permission: playerpromote.use
+permissions:
+  playerpromote.use:
+    description: allows use of promote command.
+    default: false
