@@ -2,6 +2,8 @@
 
 Paper/Purpur 1.21.1 player self promotion plugin for luckperms.
 
+You **must** have **luckperms installed** to use this plugin!
+
 Players can promote themselves from default to player (or other group, configurable!) with /agree
 
 Tell them to use it at the end of your server rules if they agree for example.
