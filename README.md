@@ -8,6 +8,8 @@ Players can promote themselves from default to player (or other group, configura
 
 Tell them to use it at the end of your server rules if they agree for example.
 
+This plugin also logs when a user uses the command to a txt file.
+
 # Permissions
 
 ```playerpromote.use``` allows a player to use /agree
