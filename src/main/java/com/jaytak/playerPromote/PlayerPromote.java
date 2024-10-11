@@ -27,6 +27,7 @@ public final class PlayerPromote extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
         // Plugin startup logic
+        getServer().getPluginManager().registerEvents(this, this);
         saveDefaultConfig();
         loadConfig();
         this.getCommand("agree").setExecutor(new AgreeCommand());
@@ -50,8 +51,9 @@ public final class PlayerPromote extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!event.getPlayer().hasPlayedBefore() && !Objects.equals(newPlayerMessage, "DISABLED")) {
-            event.getPlayer().sendMessage(newPlayerMessage);
+        getLogger().info("Player Joined! " + event.getPlayer().getName());
+        if (!event.getPlayer().hasPlayedBefore() && newPlayerMessage != null && !newPlayerMessage.equals("DISABLED")) {
+            event.getPlayer().sendMessage(playerTitle + newPlayerMessage);
         }
     }
 

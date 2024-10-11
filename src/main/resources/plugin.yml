@@ -1,5 +1,5 @@
 name: PlayerPromote
-version: '0.1.19'
+version: '0.1.22'
 main: com.jaytak.playerPromote.PlayerPromote
 api-version: '1.21'
 commands:
