@@ -13,6 +13,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 public final class PlayerPromote extends JavaPlugin implements Listener {
@@ -23,12 +28,24 @@ public final class PlayerPromote extends JavaPlugin implements Listener {
     private String alreadyPromotedMessage = "";
     private String initalGroup = "default";
     private String promoteToGroup = "group.player";
+    private File historyFile;
+
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         getServer().getPluginManager().registerEvents(this, this);
         saveDefaultConfig();
+        historyFile = new File(getDataFolder(), "PlayerAcceptHistory.txt");
+        if (!historyFile.exists()) {
+            try{
+                getDataFolder().mkdirs();
+                historyFile.createNewFile();
+            } catch (IOException e) {
+                getLogger().severe("Failed to create history file.");
+                throw new RuntimeException(e);
+            }
+        }
         loadConfig();
         this.getCommand("agree").setExecutor(new AgreeCommand());
 
@@ -54,6 +71,7 @@ public final class PlayerPromote extends JavaPlugin implements Listener {
         getLogger().info("Player Joined! " + event.getPlayer().getName());
         if (!event.getPlayer().hasPlayedBefore() && newPlayerMessage != null && !newPlayerMessage.equals("DISABLED")) {
             event.getPlayer().sendMessage(playerTitle + newPlayerMessage);
+            JTLogger("Player " + event.getPlayer().getName() + " joined for the first time and was sent the first join message.");
         }
     }
 
@@ -64,6 +82,16 @@ public final class PlayerPromote extends JavaPlugin implements Listener {
         alreadyPromotedMessage = getConfig().getString("AlreadyPromotedMessage","You are already in the group Player, or higher.");
         initalGroup = getConfig().getString("DefaultGroup", "default");
         promoteToGroup = getConfig().getString("PromoteToGroup", "group.player");
+    }
+
+    private void JTLogger(String log){
+        try(FileWriter writer = new FileWriter(historyFile, true)){
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd:hh:mm:ss"));
+            writer.write("[" + timestamp + "] " + log + "\n");
+        }
+        catch (Exception e){
+            getLogger().severe("PlayerPromote. Failed to log to file. Exception:\n" + e);
+        }
     }
 
 
@@ -78,8 +106,9 @@ public final class PlayerPromote extends JavaPlugin implements Listener {
             Player player = (Player) sender;
 
             if (command.getName().equalsIgnoreCase("agree")) {
-                if (!player.hasPermission("agreeplugin.use")) {
+                if (!player.hasPermission("playerpromote.use")) {
                     player.sendMessage(playerTitle + "You do not have permission to use this command.");
+                    JTLogger("Player " + player.getName() + " tried to use /agree but did not have permission.");
                     return true;
                 }
 
@@ -92,11 +121,14 @@ public final class PlayerPromote extends JavaPlugin implements Listener {
 
                 if (user.getPrimaryGroup().equals(initalGroup)) {
                     user.data().add(Node.builder(promoteToGroup).build());
+                    user.data().remove(Node.builder("group." + initalGroup).build());
                     luckPerms.getUserManager().saveUser(user);
+                    JTLogger("Player " + player.getName() + " agreed to the rules, and was promoted from " + initalGroup + " to " + promoteToGroup);
                     player.sendMessage(playerTitle + promoteMessage);
                 }
                 else {
                     player.sendMessage(playerTitle + alreadyPromotedMessage);
+                    JTLogger("Player " + player.getName() + " tried to use /agree but was already in a higher group.");
                 }
             }
             return true;
